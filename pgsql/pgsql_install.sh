@@ -7,20 +7,19 @@ MASTER_IP="172.16.130.39"
 SLAVE_IP="172.16.130.40"
 
 # 设置 PostgreSQL 版本和数据库数据目录
-PG_VERSION="12"  # 使用 PostgreSQL 12
+PG_VERSION="13"  # 使用 PostgreSQL 12
 PG_DATA_DIR="/var/lib/pgsql/data"
-REPLICATION_USER="replication"
-REPLICATION_PASSWORD="replication_password"
+REPLICATION_USER="replica"
+REPLICATION_PASSWORD="replica"
 
 
 
 master_pgsql(){
-  rpm -ivh pgdg-redhat-repo-latest.noarch.rpm
-  yum install postgresql11-server postgresql11-contrib -y
-  /usr/pgsql-11/bin/postgresql-11-setup initdb
+  rpm -ivh *.rpm
+  /usr/pgsql-${PG_VERSION}/bin/postgresql-${PG_VERSION}-setup initdb
 
-  systemctl start postgresql-11.service    #启动服务
-  systemctl enable postgresql-11.service   #设置服务开机自启动
+  systemctl start postgresql-${PG_VERSION}    #启动服务
+  systemctl enable postgresql-${PG_VERSION}   #设置服务开机自启动
 
   # 修改postgres密码
   psql -U postgres -c "ALTER USER postgres WITH PASSWORD postgres;"
@@ -41,6 +40,28 @@ master_pgsql(){
   systemctl restart postgresql-11.service
 
 }
+
+
+# 配置主服务器
+configure_master() {
+  echo "配置主服务器 ${MASTER_IP} ..."
+
+  # 修改 postgresql.conf 配置文件
+  sudo sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" ${PG_DATA_DIR}/postgresql.conf
+  sudo sed -i "s/#wal_level = minimal/wal_level = replica/g" ${PG_DATA_DIR}/postgresql.conf
+  sudo sed -i "s/#max_wal_senders = 0/max_wal_senders = 3/g" ${PG_DATA_DIR}/postgresql.conf
+  sudo sed -i "s/#hot_standby = off/hot_standby = on/g" ${PG_DATA_DIR}/postgresql.conf
+
+  # 配置 pg_hba.conf 文件，允许复制连接
+  echo "host replication $REPLICATION_USER $SLAVE_IP/32 md5" | sudo tee -a ${PG_DATA_DIR}/pg_hba.conf
+
+  # 创建复制用户
+  sudo -u postgres psql -c "CREATE USER $REPLICATION_USER WITH REPLICATION ENCRYPTED PASSWORD '$REPLICATION_PASSWORD';"
+
+  # 重启 PostgreSQL 服务
+  sudo systemctl restart postgresql
+}
+
 
 
 standby_pgsql(){
