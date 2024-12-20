@@ -1,0 +1,6 @@
+# 默认member.0做为ntp服务器
+member.0=10.0.108.24:root
+member.1=10.0.108.25:root
+member.2=10.0.108.26:root
+# 时间服务器ip
+server_ip=10.0.108.20

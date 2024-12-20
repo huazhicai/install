@@ -1,0 +1,4 @@
+#mongo节点
+member.0=172.16.249.22:27017:root
+member.1=172.16.249.21:27017:root
+enable_authorization=1

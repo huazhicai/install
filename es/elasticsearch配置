@@ -1,0 +1,83 @@
+elasticsearch搭建
+1、添加用户
+	adduser   elasticsearch
+	passwd elasticsearch 输入密码elasticsearch
+
+更改隶属用户：
+	chown elasticsearch /home/elasticsearch/ -R
+2、将es包上传到elasticsearch用户目录下
+3、设置elasticsearch.yml文件
+	path.data: /home/elasticsearch/data
+	# Path to log files:
+	path.logs: /home/elasticsearch/logs
+	network.host: 0.0.0.0
+	#集群名称
+	cluster.name: aiit-zhyl
+	#http绑定端口，默认可以设置9200-9300这个范围
+	http.port: 9200
+	#是否支持跨域
+	http.cors.enabled: true
+	#当设置允许跨域，默认为*,表示支持所有域名，如果我们只是允许某些网站能访问，那么可以使用正则表达式。比如只允许本地地址。 /https?:\/\/localhost(:[0-9]+)?/
+	http.cors.allow-origin: "*"
+	#是否具有成为主节点的资格
+	node.master: true
+	#节点是否存储数据
+	node.data: true
+	#允许自动创建index
+	action.auto_create_index: false
+4、elasticsearch使用java的jvm默认是使用1G的内存的，这里我们修改一下内存，直接把内存改到200m
+	vi ./config/jvm.options 
+	-Xms250m
+	-Xmx250m
+5、更改启动所需系统参数
+
+1）vi /etc/security/limits.conf
+	elasticsearch soft nofile 65536
+	elasticsearch hard nofile 65536
+	elasticsearch soft nproc 4096
+	elasticsearch hard nproc 4096
+
+2）vi  /etc/security/limits.d/20-nproc.conf 将* 改为用户名（elasticsearch）
+
+	elasticsearch          soft    nproc     4096
+
+3）vi /etc/sysctl.conf，在末尾加上：
+	vm.max_map_count = 655360
+
+	sysctl -p 即可生效
+
+6、将elasticsearch添加为服务
+	1)vi  /usr/lib/systemd/system/elasticsearch.service
+
+	[Unit]
+	Description=elasticsearch
+	Wants=network-online.target
+	After=network-online.target
+
+	[Service]
+	User=elasticsearch
+	LimitNOFILE=100000
+	LimitNPROC=100000
+	ExecStart=/home/elasticsearch/elasticsearch-5.6.9/bin/elasticsearch
+	# Let systemd restart this service on-failure
+	Restart=on-failure
+	RestartSec=5
+
+	[Install]
+	WantedBy=multi-user.target
+
+2)赋予服务配置权限
+	chmod +x /usr/lib/systemd/system/elasticsearch.service
+	chmod +x /home/elasticsearch/elasticsearch-5.6.9/bin/elasticsearch
+	1)重新加载服务配置文件
+	systemctl daemon-reload
+	2）启动minio服务
+	systemctl start elasticsearch
+	3）设置开机自启动
+	systemctl enable elasticsearch
+	4）查看服务状态
+	systemctl status elasticsearch
+	5）重加载配置文件(不终止服务)
+	systemctl reload elasticsearch
+	若服务启动异常，可以查看启动日志
+	journalctl -f或者 journalctl -xe

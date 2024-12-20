@@ -1,0 +1,5 @@
+#greenplum节点: ip:hostname:user; 默认member.0做为master
+member.0=10.0.108.24:root
+member.1=10.0.108.25:root
+member.2=10.0.108.26:root
+

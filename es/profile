@@ -1,0 +1,9 @@
+#安装elasticsearch的服务器
+member.0=172.16.249.22:root
+member.1=172.16.249.21:root
+#用户名
+auth_enable=0
+
+
+
+
