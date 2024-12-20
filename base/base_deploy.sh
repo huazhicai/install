@@ -30,10 +30,10 @@ base_file_sync(){
   do
       local_ip ${BASE_IP[i]}
       if [[ ${is_local_ip} -eq 0 ]] ;then
-        echo "========本机ip跳过mongo安装文件同步======"
+        echo "========本机ip跳过安装文件同步======"
       else
         sh ${WORKDIR}/sync.sh ${BASE_USERNAME[i]}  ${BASE_IP[i]}
-        rsync -avzP ${WORKDIR}/{base,yumpacker} ${BASE_USERNAME[i]}@${BASE_IP[i]}:${WORKDIR}/
+        rsync -avzP ${WORKDIR}/{base,package/base} ${BASE_USERNAME[i]}@${BASE_IP[i]}:${WORKDIR}/
       fi
   done
 }

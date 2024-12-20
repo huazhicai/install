@@ -27,12 +27,9 @@ else
       arr1=${array[1]}
       ip=(${arr1//:/ })
       firewall-cmd --permanent --add-rich-rule "rule family=\"ipv4\" source address="${ip[0]}" accept"
-#      echo "add rich rule:[rule family="ipv4" source address="${ip[0]}" accept]"
       firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p ICMP --icmp-type timestamp-request -m comment --comment "deny ICMP timestamp" -j DROP
       firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p ICMP --icmp-type timestamp-reply -m comment --comment "deny ICMP timestamp" -j DROP
-#      echo "deny ICMP timestamp"
       firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p ICMP --icmp-type 11 -m comment --comment "deny traceroute" -j DROP
-#      echo "deny traceroute"
     done
     firewall-cmd --reload
     firewall-cmd --list-all
