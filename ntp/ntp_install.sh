@@ -7,7 +7,7 @@ echo "脚本所在路径${WORKDIR}"
 SERVER_IP=$(grep 'server_ip' profile|awk -F'=' '{print $2}')
 LOCAL_IP=$(ip addr | grep 'inet' | grep -v 'inet6\|127.0.0.1' | grep -v grep | awk -F '/' '{print $1}' | awk '{print $2}')
 
-rpm -evh --nodeps ${WORKDIR}/rpm/*.rpm
+rpm -ivh --nodeps ${WORKDIR}/rpm/*.rpm
 
 
 install_server() {
