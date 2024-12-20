@@ -17,7 +17,6 @@ init_env() {
 
   sh ${WORKDIR}/../add_to_file.sh "x /tmp/blockmgr-*" "/usr/lib/tmpfiles.d/tmp.conf"
   sh ${WORKDIR}/../add_to_file.sh "x /tmp/spark-*" "/usr/lib/tmpfiles.d/tmp.conf"
-
 }
 
 #安装装机所需依赖

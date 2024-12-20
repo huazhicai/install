@@ -33,7 +33,8 @@ base_file_sync(){
         echo "========本机ip跳过安装文件同步======"
       else
         sh ${WORKDIR}/sync.sh ${BASE_USERNAME[i]}  ${BASE_IP[i]}
-        rsync -avzP ${WORKDIR}/{base,package/base} ${BASE_USERNAME[i]}@${BASE_IP[i]}:${WORKDIR}/
+        rsync -avzP ${WORKDIR}/base ${BASE_USERNAME[i]}@${BASE_IP[i]}:${WORKDIR}/
+        rsync -avzP ${WORKDIR}/package/base ${BASE_USERNAME[i]}@${BASE_IP[i]}:${WORKDIR}/package
       fi
   done
 }
