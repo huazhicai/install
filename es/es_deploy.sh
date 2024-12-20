@@ -55,7 +55,6 @@ es_check(){
 es_deploy(){
   es_file_sync
   source ${WORKDIR}/local_ip.sh
-  echo 'es_deploy'
   for((i=0;i<${base_num};i++))
   do
     local_ip ${BASE_IP[i]}

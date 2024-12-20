@@ -5,9 +5,13 @@ WORKDIR=$(cd "$(dirname "$0")" && pwd)
 
 # 配置
 USER='es'
-SEED_HOSTS='["172.16.130.39", "172.16.130.40"]'
 VERSION='7.14.2'
 INSTALL_DIR="/home/${USER}/elasticsearch-${VERSION}"
+
+PROFILE='./profile'
+SEED_HOSTS=$(grep -oP '\d+\.\d+\.\d+\.\d+' "$PROFILE" | paste -sd, - | sed 's/^/["/;s/$/"]/')
+echo "SEED_HOSTS=$SEED_HOSTS"
+
 
 echo "Checking and adding Elasticsearch user if not exists..."
 if ! id ${USER} &>/dev/null; then

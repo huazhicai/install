@@ -3,7 +3,3 @@ member.0=172.16.130.39:root
 member.1=172.16.130.40:root
 #用户名
 auth_enable=0
-
-
-
-
