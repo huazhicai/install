@@ -1,3 +1,10 @@
 build/
 .idea/
 *.pyc
+**__pycache__/
+**.idea/
+**/*.log
+/tools/test.py
+/Packer.iml
+yumpacker
+python/pip_package
