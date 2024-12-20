@@ -1,46 +1,88 @@
-#!/bin/sh
-WORKDIR=$(cd `dirname $0`;pwd)      #脚本所在路径
-echo "添加elasticsearch用户==============="
-USER_COUNT=`cat /etc/passwd | grep '^elasticsearch:' -c`
-if [[ $USER_COUNT -ne 1 ]]
- then
-   useradd elasticsearch
-   echo elasticsearch | passwd elasticsearch --stdin
+#!/bin/bash
+
+set -e  # Exit immediately if a command exits with a non-zero status.
+WORKDIR=$(cd "$(dirname "$0")" && pwd)
+
+# 配置
+USER='es'
+SEED_HOSTS='["172.16.130.39", "172.16.130.40"]'
+VERSION='7.14.2'
+INSTALL_DIR="/home/${USER}/elasticsearch-${VERSION}"
+
+echo "Checking and adding Elasticsearch user if not exists..."
+if ! id ${USER} &>/dev/null; then
+  useradd ${USER}
+  echo "${USER}:${USER}" | chpasswd
 else
- echo 'user exits'
+  echo "User '${USER}' already exists."
 fi
 
-echo "文件夹创建==============="
-mkdir -p /data/elasticsearch/data
-mkdir /data/elasticsearch/logs
+echo "Creating directories for Elasticsearch..."
+mkdir -p /home/${USER}/data /home/${USER}/logs
 
-echo "===================start es============================="
-rpm -ivh ${WORKDIR}/elasticsearch-7.14.2-x86_64.rpm
-cp -rf ${WORKDIR}/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
+echo "Starting Elasticsearch installation..."
+tar -zxvf "${WORKDIR}/elasticsearch-${VERSION}-linux-x86_64.tar.gz" -C "/home/${USER}"
+cp -f "${WORKDIR}/elasticsearch.yml" "${INSTALL_DIR}/config"
 
-# 修改配置参数
-machine_ip=$(ip addr | grep 'inet' | grep -v 'inet6\|127.0.0.1' | grep -v grep | awk -F '/' '{print $1}' | awk '{print $2}')
 
-sed -i "s/network.host:/network.host: ${machine_ip}/g" /etc/elasticsearch/elasticsearch.yml
-sed -i "s/node.name:/node.name: ${HOSTNAME}/g" /etc/elasticsearch/elasticsearch.yml
+echo "Updating Elasticsearch configuration..."
+machine_ip=$(hostname -I | awk '{print $1}' | head -n 1)  # 获取第一个 IP 地址
+sed -i "s/^network.host:.*$/network.host: ${machine_ip}/" "${INSTALL_DIR}/config/elasticsearch.yml"
+sed -i "s/^node.name:.*$/node.name: ${HOSTNAME}/" "${INSTALL_DIR}/config/elasticsearch.yml"
+echo "discovery.seed_hosts: ${SEED_HOSTS}" >> "${INSTALL_DIR}/config/elasticsearch.yml"
+echo "cluster.initial_master_nodes: ${SEED_HOSTS}" >> "${INSTALL_DIR}/config/elasticsearch.yml"
 
-chown elasticsearch /home/elasticsearch/ -R
-chown elasticsearch /data/elasticsearch/ -R
-echo "===================更改启动所需系统参数============================="
-sed -i '$a elasticsearch soft nofile 65536' /etc/security/limits.conf
-sed -i '$a elasticsearch hard nofile 65536' /etc/security/limits.conf
-sed -i '$a elasticsearch soft nproc 4096' /etc/security/limits.conf
-sed -i '$a elasticsearch hard nproc 4096' /etc/security/limits.conf
-sed -i '$a vm.max_map_count = 655360' /etc/sysctl.conf
-sed -i 's/*/elasticsearch/' /etc/security/limits.d/20-nproc.conf
 
+echo "Setting ownership for Elasticsearch directories..."
+chown -R ${USER}:${USER} /home/${USER}
+
+echo "Updating system parameters for Elasticsearch..."
+grep -q ${USER} /etc/security/limits.conf || cat <<EOF >> /etc/security/limits.conf
+${USER} soft nofile 65536
+${USER} hard nofile 65536
+${USER} soft nproc 4096
+${USER} hard nproc 4096
+EOF
+
+sysctl_conf="/etc/sysctl.conf"
+if ! grep -q 'vm.max_map_count' "$sysctl_conf"; then
+  echo "vm.max_map_count=655360" >> "$sysctl_conf"
+fi
 sysctl -p
 
-echo "1)重新加载服务配置文件"
+
+echo "Install plugins..."
+mkdir -p "${INSTALL_DIR}/plugins/ik" "${INSTALL_DIR}/plugins/pinyin"
+unzip -o "${WORKDIR}/elasticsearch-analysis-ik-${VERSION}.zip" -d "${INSTALL_DIR}/plugins/ik"
+unzip -o "${WORKDIR}/elasticsearch-analysis-pinyin-${VERSION}.zip" -d "${INSTALL_DIR}/plugins/pinyin"
+
+
+# 创建 systemd 服务文件
+echo "Creating systemd service for Elasticsearch..."
+cat>/usr/lib/systemd/system/${USER}.service<<EOF
+[Unit]
+Description=elasticsearch
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=${USER}
+LimitNOFILE=100000
+LimitNPROC=100000
+ExecStart=${INSTALL_DIR}/bin/elasticsearch
+# Let systemd restart this service on-failure
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+# 启动 Elasticsearch 服务
+echo "Starting Elasticsearch service..."
 systemctl daemon-reload
-echo "2）启动服务"
-systemctl start elasticsearch
-echo "3）设置开机自启动"
-systemctl enable elasticsearch
-echo "4）查看服务状态"
-systemctl status elasticsearch
+systemctl start ${USER}
+systemctl enable ${USER}
+systemctl status ${USER} --no-pager
+echo 'curl -X GET "localhost:9200/_cluster/health?pretty"'

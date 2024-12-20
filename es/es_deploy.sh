@@ -36,6 +36,7 @@ es_file_sync(){
       else
         sh ${WORKDIR}/sync.sh ${BASE_USERNAME[i]}  ${BASE_IP[i]}
         rsync -avzP ${WORKDIR}/es ${BASE_USERNAME[i]}@${BASE_IP[i]}:${WORKDIR}/
+        rsync -avzP ${WORKDIR}/package/elasticsearch* ${BASE_USERNAME[i]}@${BASE_IP[i]}:${WORKDIR}/es
       fi
   done
 }
