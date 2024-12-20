@@ -1,7 +1,7 @@
 #!/bin/sh
 WORKDIR=$(cd `dirname $0`;pwd)      #脚本所在路径
 echo "脚本所在路径${WORKDIR}"
-YUM_PATH=$WORKDIR/../yumpacker
+YUM_PATH=$WORKDIR/../package/base
 PROFILE_PATH=${WORKDIR}/profile
 USERS=$(grep 'USERS' ${PROFILE_PATH}|awk -F'=' '{print $2}')
 INIT_USERS=(${USERS//,/ })
