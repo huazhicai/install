@@ -45,8 +45,9 @@ configure_master() {
   # 初始化数据库
   /usr/pgsql-${PG_VERSION}/bin/postgresql-${PG_VERSION}-setup initdb || handle_error "主服务器数据库初始化失败"
   systemctl start postgresql-${PG_VERSION} || handle_error "主服务器启动失败"
+  cd ${PG_DATA_DIR}  # 避免切用户出现 Permission denied
 
-  # 配置 PostgreSQL 主服务器
+  # 配置 PostgreSQL 主服务器， 报错不影响执行（ Permission denied）
   sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';" || handle_error "设置主服务器 postgres 密码失败"
   sudo -u postgres psql -c "CREATE ROLE $REPLICATION_USER LOGIN REPLICATION ENCRYPTED PASSWORD '$REPLICATION_PASSWORD';" || handle_error "创建复制用户失败"
 
@@ -59,7 +60,6 @@ configure_master() {
     echo "$param" >> ${PG_DATA_DIR}/postgresql.conf
   done
 
-  sudo chown -R postgres:postgres ${PG_DATA_DIR}
   # 重启 PostgreSQL 服务以应用配置
   systemctl enable postgresql-${PG_VERSION} || handle_error "主服务器开机自启设置失败"
   systemctl restart postgresql-${PG_VERSION} || handle_error "主服务器重启失败"
@@ -69,7 +69,8 @@ configure_slave() {
   echo "配置从服务器 ${SLAVE_IP} ..."
 
   # 清理从服务器的数据目录
-  sudo rm -rf ${PG_DATA_DIR}/* || handle_error "清理从服务器数据目录失败"
+  cd ${PG_DATA_DIR}  # 避免切用户出现 Permission denied
+  sudo rm -rf *
 
   # 使用 pg_basebackup 从主服务器同步数据
   sudo -u postgres pg_basebackup -h ${MASTER_IP} -D ${PG_DATA_DIR} -U $REPLICATION_USER -X stream -P || handle_error "从服务器同步数据失败"
@@ -84,29 +85,23 @@ configure_slave() {
   echo "hot_standby = on" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf > /dev/null
   echo "hot_standby_feedback = on" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf > /dev/null
 
-  sudo chown -R postgres:postgres ${PG_DATA_DIR}
   # 启动从服务器
-  sudo systemctl enable postgresql-${PG_VERSION} || handle_error "从服务器设置开机自启失败"
+  sudo systemctl enable postgresql-${PG_VERSION}
   sudo systemctl start postgresql-${PG_VERSION} || handle_error "从服务器启动失败"
-}
 
-
-check_replication() {
-  echo "主服务器复制状态："
+  echo "检查主服务器复制状态"
   sudo -u postgres psql -h ${MASTER_IP} -c "SELECT * FROM pg_stat_replication;" || handle_error "检查主服务器复制状态失败"
 }
-
 
 main() {
 #  install_postgresql
 
   if [ "${machine_ip}" == "${MASTER_IP}" ]; then
-    configure_master
+    #configure_master
+    echo 'pass'
   else
     configure_slave
   fi
-
-  check_replication
 }
 
 main
