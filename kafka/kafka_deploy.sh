@@ -35,6 +35,7 @@ kafka_file_sync(){
     else
       sh ${WORKDIR}/sync.sh ${USER[i]} ${IP[i]}
       rsync -avzP ${WORKDIR}/kafka ${USER[i]}@${IP[i]}:${WORKDIR}/
+      rsync -avzP ${WORKDIR}/package/kafka* ${USER[i]}@${IP[i]}:${WORKDIR}/
     fi
   done
 }
@@ -55,33 +56,6 @@ kafka_check(){
 }
 
 
-zookeeper_deploy(){
-    source ${WORKDIR}/local_ip.sh
-  kafka_file_sync
-  echo "############zookeeper配置文件准备,需准备${kafka_clusters_num}个节点的配置文件......"
-	echo "excute time:$(date +"%Y-%m-%d %H:%M:%S")"
-  for((i=0;i<${kafka_clusters_num};i++))
-  do
-    local_ip ${IP[i]}
-    echo "############部署节点${IP[i]}:${HOSTNAME[i]}"
-    if [[ ${is_local_ip} -eq 0 ]] ;then
-      sh ${WORKDIR}/kafka/zookeeper_install.sh ${i}
-    else
-      ssh ${USER[i]}@${IP[i]} -t -t "bash ${WORKDIR}/kafka/zookeeper_install.sh ${i}"
-    fi
-  done
-
-  for((i=0;i<${kafka_clusters_num};i++))
-  do
-    local_ip ${IP[i]}
-    echo "############部署节点${IP[i]}:${HOSTNAME[i]}"
-    if [[ ${is_local_ip} -eq 0 ]] ;then
-      sh ${WORKDIR}/kafka/zookeeper_init.sh
-    else
-      ssh ${USER[i]}@${IP[i]} -t -t "bash systemctl start zookeeper"
-    fi
-  done
-}
 
 kafka_deploy(){
   zookeeper_deploy
