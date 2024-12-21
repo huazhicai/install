@@ -51,7 +51,7 @@ configure_master() {
   # 配置 PostgreSQL 主服务器， 报错不影响执行（ Permission denied）
   sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';" || handle_error "设置主服务器 postgres 密码失败"
   sudo -u postgres psql -c "CREATE ROLE $REPLICATION_USER LOGIN REPLICATION ENCRYPTED PASSWORD '$REPLICATION_PASSWORD';" || handle_error "创建复制用户失败"
-  sudo -u postgres psql -c "CREATE ROLE "aiit-zhyl" LOGIN REPLICATION ENCRYPTED PASSWORD 'zhyl0123';" || handle_error "创建复制用户失败"
+  sudo -u postgres psql -c "CREATE ROLE \"aiit-zhyl\" LOGIN REPLICATION ENCRYPTED PASSWORD 'zhyl0123';" || handle_error "创建复制用户失败"
 
   # 修改 pg_hba.conf 配置
   echo "host    all            all        ${VPC_IP}    md5" >> ${PG_DATA_DIR}/pg_hba.conf
