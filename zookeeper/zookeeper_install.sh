@@ -12,10 +12,16 @@ INSTALL_DIR="/usr/local/zookeeper"
 # 获取所有的节点 IP
 IPS=($(grep '^member.' ${PROFILE} | awk -F'=' '{print $2}' | awk -F':' '{print $1}'))
 
+
+handle_error() {
+  echo "错误: $1"
+  exit 1
+}
+
 # 安装 Zookeeper
 install() {
     # 解压 Zookeeper
-    tar -zxf ${WORKDIR}/apache-zookeeper-${VERSION}-bin.tar.gz
+    tar -zxvf ${WORKDIR}/apache-zookeeper-${VERSION}-bin.tar.gz || handle_error "解压失败"
     mv ${WORKDIR}/apache-zookeeper-${VERSION}-bin ${INSTALL_DIR}
 
     # 复制默认配置文件
