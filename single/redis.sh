@@ -13,7 +13,7 @@ REDIS_TAR="${WORKDIR}/../package/redis-6.2.6.tar.gz"
 echo "解压 Redis 安装包并开始安装..."
 tar -zxvf "$REDIS_TAR" -C "$WORKDIR"
 cd "$REDIS_VERSION"
-# make && make install  # 默认安装在 /usr/local/bin 下
+make && make install  # 默认安装在 /usr/local/bin 下
 
 
 # 配置 Redis
@@ -25,7 +25,7 @@ sed -i '/^\s*#/d' /etc/redis/redis.conf
 sed -i '/^\s*$/d' /etc/redis/redis.conf
 # 修改 Redis 配置文件
 sed -i 's/daemonize no/daemonize yes/g' /etc/redis/redis.conf
-sed -i "s/bind 127.0.0.1/bind ${LOCAL_IP}/g" /etc/redis/redis.conf
+sed -i "s/bind 127.0.0.1*/bind ${LOCAL_IP}/g" /etc/redis/redis.conf
 sed -i "s|dir .|dir /etc/redis|g" /etc/redis/redis.conf
 sed -i "s|logfile \"\"|logfile /etc/redis/redis.log|g" /etc/redis/redis.conf
 
