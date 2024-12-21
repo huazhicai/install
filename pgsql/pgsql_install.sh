@@ -18,6 +18,7 @@ machine_ip=$(hostname -I | awk '{print $1}' | head -n 1)  # 获取第一个 IP �
 
 # PostgreSQL 配置项
 CONFIGURE_PARAMS=(
+  "listen_addresses = '*'"
   "max_connections = 100"
   "wal_level = replica"
   "synchronous_commit = on"
@@ -73,6 +74,7 @@ configure_slave() {
   sudo rm -rf *
 
   # 使用 pg_basebackup 从主服务器同步数据
+  export PGPASSWORD=${REPLICATION_PASSWORD}
   sudo -u postgres pg_basebackup -h ${MASTER_IP} -D ${PG_DATA_DIR} -U $REPLICATION_USER -X stream -P || handle_error "从服务器同步数据失败"
 
   # 配置从服务器的 standby.signal
