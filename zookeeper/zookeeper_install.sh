@@ -33,7 +33,7 @@ install() {
   # 为每个节点添加 server 配置
   for ((i = 0; i < ${#IPS[@]}; i++)); do
     # 添加 server 配置，格式为 server.x=ip:2888:3888
-    sed -i "\$a server=$((i + 1))=${IPS[i]}:2888:3888" ${INSTALL_DIR}/conf/zoo.cfg
+    sed -i "\$a server.$((i + 1))=${IPS[i]}:2888:3888" ${INSTALL_DIR}/conf/zoo.cfg
   done
 
   # 设置 myid 文件
