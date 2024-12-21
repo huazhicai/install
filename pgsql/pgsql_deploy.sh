@@ -40,7 +40,7 @@ pgsql_file_sync(){
 
 pgsql_check(){
   if [[ ${#BASE_IP[*]} -eq ${base_num} && ${#BASE_USERNAME[*]} -eq ${base_num} ]] ;then
-    echo "python 配置校验成功"
+    echo "pgsql 配置校验成功"
     return 0
   fi
   echo "exit 退出,节点配置格式为member.节点id=内网ip:用户,例 member.0=172.16.11.11:root"
