@@ -2,7 +2,7 @@
 WORKDIR=$(cd `dirname $0`;pwd)      #脚本所在路径
 echo "脚本所在路径${WORKDIR}"
 
-RPM_PATH=${WORKDIR}/yum
+RPM_PATH=${WORKDIR}/../package/mongo
 PORT=$1
 PROFILE_PATH=${WORKDIR}/profile
 
