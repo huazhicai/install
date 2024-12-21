@@ -1,6 +1,6 @@
 #!/bin/sh
 WORKDIR=$(cd $(dirname $0);pwd) #脚本所在路径
-echo "脚本所在路径${WORKDIR}"
+echo -e "\n脚本所在路径${WORKDIR}"
 
 PROFILE_PATH=${WORKDIR}/profile
 INSTALL_DIR='/usr/local/kafka'

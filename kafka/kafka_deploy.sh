@@ -1,6 +1,6 @@
 #!/bin/sh
 WORKDIR=$(cd `dirname $0`;pwd)      #脚本所在路径
-echo "脚本所在路径${WORKDIR}"
+echo -e "\n脚本所在路径${WORKDIR}"
 PROFILE_PATH=${WORKDIR}/kafka/profile
 
 ######################profile######################
@@ -33,7 +33,7 @@ kafka_file_sync(){
       else
         sh ${WORKDIR}/sync.sh ${BASE_USERNAME[i]}  ${BASE_IP[i]}
         rsync -avzP ${WORKDIR}/kafka ${BASE_USERNAME[i]}@${BASE_IP[i]}:${WORKDIR}/
-        rsync -avzP ${WORKDIR}/package/kafka* ${BASE_USERNAME[i]}@${BASE_IP[i]}:${WORKDIR}/
+        rsync -avzP ${WORKDIR}/package/kafka* ${BASE_USERNAME[i]}@${BASE_IP[i]}:${WORKDIR}/package
       fi
   done
 }
