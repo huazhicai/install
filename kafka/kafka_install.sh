@@ -5,7 +5,7 @@ echo "脚本所在路径${WORKDIR}"
 PROFILE_PATH=${WORKDIR}/profile
 INSTALL_DIR='/usr/local/kafka'
 
-broker_id=$1
+broker_id=$(( $1 + 1 ))  # 计算 id，$1 是传入的参数，$1+1
 
 LOCAL_IP=$(hostname -I | awk '{print $1}' | head -n 1)  # 获取第一个 IP 地址
 
