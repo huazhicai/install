@@ -15,7 +15,7 @@ Usage:
     -s|--spark 安装spark
     -n|--nginx nginx配置
     -r|--redis redis安装
-    -q|--rabbitmq rabbitmq安装
+    -q|--pgsql pgsql安装
     -g|--greenplum greenplum安装
     -f|--filebeat filebeat安装
     -t|--ntp ntp安装
@@ -28,7 +28,7 @@ EOF
     exit 1
 }
 COMMAND=()
-ARGS=`getopt -a -o abmiesnhprqgtkzfdv -l all,base,mongo,minio,elasticsearch,spark,nginx,help,python,redis,rabbitmq,greenplum,ntp,kafka,zookeeper,filebeat,docker,v2ray -- "$@"`
+ARGS=`getopt -a -o abmiesnhprqgtkzfdv -l all,base,mongo,minio,elasticsearch,spark,nginx,help,python,redis,pgsql,greenplum,ntp,kafka,zookeeper,filebeat,docker,v2ray -- "$@"`
 [[ $? -ne 0 ]] && usage
 #set -- "${ARGS}"
 eval set -- "${ARGS}"
@@ -62,8 +62,8 @@ do
         -r|--redis)
                 COMMAND[${#COMMAND[*]}]="redis_exporter"
                 ;;
-        -q|--rabbitmq)
-                COMMAND[${#COMMAND[*]}]="rabbitmq"
+        -q|--pgsql)
+                COMMAND[${#COMMAND[*]}]="pgsql"
                 ;;
         -g|--greenplum)
                 COMMAND[${#COMMAND[*]}]="greenplum"
@@ -109,7 +109,7 @@ do
   fi
 done
 if [[ ${HAS_ALL} ==  true ]] ;then
-  COMMAND=("base" "mongo" "minio" "es" "python" "nginx" "redis" "rabbitmq" "greenplum" "ntp" "kafka" "zookeeper" "filebeat" "v2ray")
+  COMMAND=("base" "mongo" "minio" "es" "python" "nginx" "redis" "pgsql" "greenplum" "ntp" "kafka" "zookeeper" "filebeat" "v2ray")
 fi
 
 for((ii=0;ii<${#COMMAND[*]};ii++))
