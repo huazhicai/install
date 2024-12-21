@@ -25,7 +25,6 @@ done
 
 pgsql_file_sync(){
   echo "========开始pgsql配置同步======"
-  source ${WORKDIR}/local_ip.sh
   for((i=0;i<${#BASE_IP[@]};i++))
   do
       local_ip ${BASE_IP[i]}
@@ -48,8 +47,8 @@ pgsql_check(){
 }
 
 pgsql_deploy(){
-  pgsql_file_sync
   source ${WORKDIR}/local_ip.sh
+  pgsql_file_sync
   for((i=0;i<${base_num};i++))
   do
     local_ip ${BASE_IP[i]}
