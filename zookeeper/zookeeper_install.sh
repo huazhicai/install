@@ -61,6 +61,7 @@ EOF
   systemctl daemon-reload
   systemctl start zookeeper
   systemctl enable zookeeper
+  ${INSTALL_DIR}/bin/zkServer.sh status
 }
 
 # 调用安装函数
