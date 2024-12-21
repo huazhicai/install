@@ -26,25 +26,32 @@ CONFIGURE_PARAMS=(
   "archive_mode = on"
 )
 
+# 错误处理函数
+handle_error() {
+  echo "错误: $1"
+  exit 1
+}
 
-# 配置主服务器
-configure_master() {
+install_postgresql() {
   echo "安装 PostgreSQL ..."
-#  yum localinstall -y rpm/*.rpm
-#  rpm -ivh --nodeps rpm/*.rpm
-  /usr/pgsql-${PG_VERSION}/bin/postgresql-${PG_VERSION}-setup initdb
-  systemctl start postgresql-${PG_VERSION}    # 启动服务
-  systemctl enable postgresql-${PG_VERSION}   # 设置服务开机自启动
+  # yum localinstall -y rpm/*.rpm || handle_error "PostgreSQL 安装失败"
+   rpm -ivh --nodeps rpm/*.rpm || handle_error "PostgreSQL 安装失败"
+}
 
+
+configure_master() {
   echo "配置主服务器 ${MASTER_IP} ..."
 
-  sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+  # 初始化数据库
+  /usr/pgsql-${PG_VERSION}/bin/postgresql-${PG_VERSION}-setup initdb || handle_error "主服务器数据库初始化失败"
+  systemctl start postgresql-${PG_VERSION} || handle_error "主服务器启动失败"
 
-  # 创建同步复制用户
-  sudo -u postgres psql -c "CREATE ROLE $REPLICATION_USER LOGIN REPLICATION ENCRYPTED PASSWORD '$REPLICATION_PASSWORD';"
+  # 配置 PostgreSQL 主服务器
+  sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';" || handle_error "设置主服务器 postgres 密码失败"
+  sudo -u postgres psql -c "CREATE ROLE $REPLICATION_USER LOGIN REPLICATION ENCRYPTED PASSWORD '$REPLICATION_PASSWORD';" || handle_error "创建复制用户失败"
 
-  # 允许同步复制
-  echo "host    all            all        ${VPC_IP}    md5" >> ${PG_DATA_DIR}/pg_hba.conf   # 相同网段可以密码连接
+  # 修改 pg_hba.conf 配置
+  echo "host    all            all        ${VPC_IP}    md5" >> ${PG_DATA_DIR}/pg_hba.conf
   echo "host    replication    replica    ${SLAVE_IP}/32    md5" >> ${PG_DATA_DIR}/pg_hba.conf
 
   # 配置 PostgreSQL 参数
@@ -52,47 +59,47 @@ configure_master() {
     echo "$param" >> ${PG_DATA_DIR}/postgresql.conf
   done
 
-  systemctl restart postgresql-${PG_VERSION}
+  sudo chown -R postgres:postgres ${PG_DATA_DIR}
+  # 重启 PostgreSQL 服务以应用配置
+  systemctl enable postgresql-${PG_VERSION} || handle_error "主服务器开机自启设置失败"
+  systemctl restart postgresql-${PG_VERSION} || handle_error "主服务器重启失败"
 }
 
-# 配置从服务器
 configure_slave() {
-  echo "安装 PostgreSQL ..."
-#  rpm -ivh --nodeps rpm/*.rpm
-
   echo "配置从服务器 ${SLAVE_IP} ..."
 
   # 清理从服务器的数据目录
-  sudo rm -rf ${PG_DATA_DIR}/*
+  sudo rm -rf ${PG_DATA_DIR}/* || handle_error "清理从服务器数据目录失败"
 
   # 使用 pg_basebackup 从主服务器同步数据
-  sudo -u postgres pg_basebackup -h ${MASTER_IP} -D ${PG_DATA_DIR} -U $REPLICATION_USER -X stream -P
+  sudo -u postgres pg_basebackup -h ${MASTER_IP} -D ${PG_DATA_DIR} -U $REPLICATION_USER -X stream -P || handle_error "从服务器同步数据失败"
 
-  echo "standby_mode = 'on'" | sudo tee ${PG_DATA_DIR}/standby.signal  # （pg版本11后已经废除recovery.conf）
+  # 配置从服务器的 standby.signal
+  echo "standby_mode = 'on'" | sudo tee ${PG_DATA_DIR}/standby.signal > /dev/null
+  echo "primary_conninfo = 'host=${MASTER_IP} port=5432 user=$REPLICATION_USER password=$REPLICATION_PASSWORD'" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf > /dev/null
+  echo "recovery_target_timeline = 'latest'" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf > /dev/null
+  echo "max_standby_streaming_delay = 30s" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf > /dev/null
+  echo "wal_receiver_status_interval = 10s" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf > /dev/null
+  echo "max_connections = 1000" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf > /dev/null
+  echo "hot_standby = on" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf > /dev/null
+  echo "hot_standby_feedback = on" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf > /dev/null
 
-  echo "primary_conninfo = 'host=${MASTER_IP} port=5432 user=$REPLICATION_USER password=$REPLICATION_PASSWORD'" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf
-  echo "recovery_target_timeline = 'latest'" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf
-  echo "max_standby_streaming_delay = 30s" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf
-  echo "wal_receiver_status_interval = 10s" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf
-  echo "max_connections = 1000" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf
-  echo "hot_standby = on" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf
-  echo "hot_standby_feedback = on" | sudo tee -a ${PG_DATA_DIR}/postgresql.conf
-
-  sudo chown -R postgres.postgres ${PG_DATA_DIR}
-
+  sudo chown -R postgres:postgres ${PG_DATA_DIR}
   # 启动从服务器
-  sudo systemctl enable postgresql-${PG_VERSION}
-  sudo systemctl start postgresql-${PG_VERSION}
+  sudo systemctl enable postgresql-${PG_VERSION} || handle_error "从服务器设置开机自启失败"
+  sudo systemctl start postgresql-${PG_VERSION} || handle_error "从服务器启动失败"
 }
 
+
 check_replication() {
-  # 在主服务器上检查复制状态
-  echo "主服务器复制状态：SELECT * FROM pg_stat_replication"
-  sudo -u postgres psql -h ${MASTER_IP} -c "SELECT * FROM pg_stat_replication;"
+  echo "主服务器复制状态："
+  sudo -u postgres psql -h ${MASTER_IP} -c "SELECT * FROM pg_stat_replication;" || handle_error "检查主服务器复制状态失败"
 }
 
 
 main() {
+#  install_postgresql
+
   if [ "${machine_ip}" == "${MASTER_IP}" ]; then
     configure_master
   else
