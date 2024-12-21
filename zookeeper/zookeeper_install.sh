@@ -1,53 +1,66 @@
-#!/bin/sh
-WORKDIR=$(cd `dirname $0`;pwd)      #脚本所在路径
-echo "脚本所在路径${WORKDIR}"
+#!/bin/bash
 
-id=$[$1+1]
+WORKDIR=$(cd `dirname $0`; pwd)      # 脚本所在路径
+echo "脚本所在路径: ${WORKDIR}"
 
-PROFILE=${WORKDIR}/profile
+id=$(( $1 + 1 ))  # 计算 id，$1 是传入的参数，$1+1
 
-IPS=($(grep '^member.' ${PROFILE}|awk -F'=' '{print $2}'|awk -F':' '{print $1}'))
+PROFILE="${WORKDIR}/profile"
+VERSION='3.7.1'
+INSTALL_DIR="/usr/local/zookeeper"
 
+# 获取所有的节点 IP
+IPS=($(grep '^member.' ${PROFILE} | awk -F'=' '{print $2}' | awk -F':' '{print $1}'))
+
+# 安装 Zookeeper
 install() {
-  rm -rf /usr/local/zookeeper && cd ~
-  if [ ! -f "/usr/local/zookeeper/README.md" ]; then
-    systemctl stop firewalld && systemctl disable firewalld
-    tar -zxf ${WORKDIR}/apache-zookeeper-3.7.1-bin.tar.gz -C /usr/local
-    mv /usr/local/apache-zookeeper-3.7.1-bin /usr/local/zookeeper
-    cd /usr/local/zookeeper/conf && mv zoo_sample.cfg zoo.cfg
+    # 解压 Zookeeper
+    tar -zxf ${WORKDIR}/apache-zookeeper-${VERSION}-bin.tar.gz
+    mv ${WORKDIR}/apache-zookeeper-${VERSION}-bin ${INSTALL_DIR}
 
-    mkdir -p /data/zookeeper-cluster/data
-    sed -i '/dataDir=/c dataDir=/data/zookeeper-cluster/data' /usr/local/zookeeper/conf/zoo.cfg
+    # 复制默认配置文件
+    cp ${INSTALL_DIR}/conf/zoo_sample.cfg ${INSTALL_DIR}/conf/zoo.cfg
 
-    for((i=0;i<${#IPS[*]};i++))
+    # 创建数据目录和日志目录
+    mkdir -p ${INSTALL_DIR}/{data,logs}
+
+    # 修改配置文件
+    sed -i "s|dataDir=.*|dataDir=${INSTALL_DIR}/data|" ${INSTALL_DIR}/conf/zoo.cfg
+    sed -i "s|dataLogDir=.*|dataLogDir=${INSTALL_DIR}/logs|" ${INSTALL_DIR}/conf/zoo.cfg
+
+    # 为每个节点添加 server 配置
+    for ((i = 0; i < ${#IPS[@]}; i++))
     do
-      sed -i "\$a server.$[$i+1]=${IPS[i]}:2888:3888" /usr/local/zookeeper/conf/zoo.cfg
+        # 添加 server 配置，格式为 server.x=ip:2888:3888
+        sed -i "\$a server=$((i + 1))=${IPS[i]}:2888:3888" ${INSTALL_DIR}/conf/zoo.cfg
     done
 
-    cd /data/zookeeper-cluster/data && echo ${id} > myid
+    # 设置 myid 文件
+    echo ${id} > ${INSTALL_DIR}/data/myid
 
+    # 创建 systemd 服务
     cat <<EOF | sudo tee /etc/systemd/system/zookeeper.service
 [Unit]
 Description=ZooKeeper Service
-After=network-online.target 
+After=network-online.target
 Requires=network-online.target
 
 [Service]
 Type=forking
-
-ExecStart=/usr/local/zookeeper/bin/zkServer.sh --config /usr/local/zookeeper/conf start
-ExecStop=/usr/local/zookeeper/bin/zkServer.sh --config /usr/local/zookeeper/conf stop
-ExecReload=/usr/local/zookeeper/bin/zkServer.sh --config /usr/local/zookeeper/conf restart
-WorkingDirectory=/usr/local
+ExecStart=${INSTALL_DIR}/bin/zkServer.sh --config ${INSTALL_DIR}/conf start
+ExecStop=${INSTALL_DIR}/bin/zkServer.sh --config ${INSTALL_DIR}/conf stop
+ExecReload=${INSTALL_DIR}/bin/zkServer.sh --config ${INSTALL_DIR}/conf restart
+WorkingDirectory=${INSTALL_DIR}
 
 [Install]
 WantedBy=multi-user.target
 EOF
-  fi
 
-  systemctl daemon-reload
-  systemctl start zookeeper
-  systemctl enable zookeeper
+    # 重新加载 systemd 服务，启动 Zookeeper 服务，并设置开机自启动
+    systemctl daemon-reload
+    systemctl start zookeeper
+    systemctl enable zookeeper
 }
 
+# 调用安装函数
 install
