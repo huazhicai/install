@@ -74,8 +74,13 @@ configure_slave() {
   sudo rm -rf *
 
   # 使用 pg_basebackup 从主服务器同步数据
-  export PGPASSWORD=${REPLICATION_PASSWORD}
-  sudo -u postgres pg_basebackup -h ${MASTER_IP} -D ${PG_DATA_DIR} -U $REPLICATION_USER -X stream -P || handle_error "从服务器同步数据失败"
+#  sudo -u postgres pg_basebackup -h ${MASTER_IP} -D ${PG_DATA_DIR} -U $REPLICATION_USER -X stream -P || handle_error "从服务器同步数据失败"
+  expect -c "
+spawn sudo -u postgres pg_basebackup -h ${MASTER_IP} -D ${PG_DATA_DIR} -U ${REPLICATION_USER} -X stream -P
+expect \"Password for user ${REPLICATION_USER}: \"
+send \"${REPLICATION_PASSWORD}\r\"
+expect eof
+"
 
   # 配置从服务器的 standby.signal
   echo "standby_mode = 'on'" | sudo tee ${PG_DATA_DIR}/standby.signal > /dev/null
@@ -96,11 +101,10 @@ configure_slave() {
 }
 
 main() {
-#  install_postgresql
+  install_postgresql
 
   if [ "${machine_ip}" == "${MASTER_IP}" ]; then
-    #configure_master
-    echo 'pass'
+    configure_master
   else
     configure_slave
   fi
