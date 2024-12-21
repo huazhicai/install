@@ -35,6 +35,7 @@ mongo_file_sync(){
     else
       sh ${WORKDIR}/sync.sh ${USER[i]} ${IP[i]}
       rsync -avzP ${WORKDIR}/mongo ${USER[i]}@${IP[i]}:${WORKDIR}/
+      rsync -avzP ${WORKDIR}/package/mongo ${USER[i]}@${IP[i]}:${WORKDIR}/yum
     fi
   done
 }
