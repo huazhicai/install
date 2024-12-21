@@ -46,7 +46,7 @@ mongo_check(){
       echo "mongo 配置校验成功"
       return 0
     fi
-    echo "exit 退出,节点配置格式为member.节点id=内网ip：端口:用户,例 member.0=172.16.11.11:9000:root"
+    echo "exit 退出,节点配置格式为member.节点id=内网ip：端口:用户,例 member.0=172.16.11.11:27017:root"
     return 0
   else
     echo "exit 退出,mongo集群节点数必须配置,请前往${PROFILE_PATH}配置"
