@@ -9,7 +9,8 @@ install_python(){
   echo "###########################安装python"
   cd ${WORKDIR} && tar -xzf Python-3.8.5.tgz && cd Python-3.8.5/ &&./configure --enable-optimizations --enable-loadable-sqlite-extensions && make clean && make altinstall
   ln -sf /usr/local/bin/python3.8 /usr/local/bin/python3
-  echo "###########################安装pip"
+  ln -sf /usr/local/bin/pip3.8 /usr/local/bin/pip3.8
+  echo "###########################安装pip包"
   cd ${WORKDIR} && python3 -m pip install --no-index --find-links=./pip_package -r requirements.txt
 }
 
