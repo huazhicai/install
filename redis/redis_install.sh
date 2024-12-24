@@ -32,7 +32,7 @@ config_redis() {
     echo "配置 Redis..."
 
     # 创建 Redis 数据目录
-    mkdir -p /etc/redis/${PORT}/data
+    mkdir -p /etc/redis/${PORT}
 
     # 拷贝并清理配置文件
     cp ${WORKDIR}/redis-6.2.6/redis.conf /etc/redis/${PORT}/redis.conf
@@ -40,14 +40,14 @@ config_redis() {
     sed -i 's/daemonize no/daemonize yes/g' /etc/redis/${PORT}/redis.conf
     sed -i "s/bind 127.0.0.1 .*/bind ${HOST}/g" /etc/redis/${PORT}/redis.conf
     sed -i "s/port .*/port ${PORT}/g" /etc/redis/${PORT}/redis.conf
-    sed -i "s|dir .|dir /etc/redis/${PORT}/data|g" /etc/redis/${PORT}/redis.conf
+    sed -i "s|dir .|dir /etc/redis/${PORT}|g" /etc/redis/${PORT}/redis.conf
     sed -i "s|logfile .*|logfile /etc/redis/${PORT}/redis.log|g" /etc/redis/${PORT}/redis.conf
     sed -i "s|pidfile .*|pidfile /var/run/redis_${PORT}.pid|g" /etc/redis/${PORT}/redis.conf
     sed -i "s|appendonly no|appendonly yes|g" /etc/redis/${PORT}/redis.conf
 
     # 启用 Redis 集群配置
     sed -i "s|^# cluster-enabled|cluster-enabled|g" /etc/redis/${PORT}/redis.conf
-    sed -i "s|^# cluster-config-file *|cluster-config-file nodes-${PORT}.conf|g" /etc/redis/${PORT}/redis.conf
+    sed -i "s|^# cluster-config-file .*|cluster-config-file nodes-${PORT}.conf|g" /etc/redis/${PORT}/redis.conf
     sed -i "s|^# cluster-node-timeout|cluster-node-timeout|g" /etc/redis/${PORT}/redis.conf  # 设置合理的超时时间
 
     # 设置密码
