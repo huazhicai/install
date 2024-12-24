@@ -60,7 +60,7 @@ do
                 COMMAND[${#COMMAND[*]}]="nginx"
                 ;;
         -r|--redis)
-                COMMAND[${#COMMAND[*]}]="redis_exporter"
+                COMMAND[${#COMMAND[*]}]="redis"
                 ;;
         -q|--pgsql)
                 COMMAND[${#COMMAND[*]}]="pgsql"
