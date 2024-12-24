@@ -70,9 +70,9 @@ redis_deploy(){
   members=$(grep '^member.' ${PROFILE_PATH}|awk -F'=' '{print $2}'|awk -F':' '{print $1":"$2}')
   local_ip ${IP[0]}
   if [[ ${is_local_ip} -eq 0 ]] ;then
-    /usr/local/redis/bin/redis-cli -a "Zhyl&redis123" --cluster create ${members} --cluster-replicas 1
+    /usr/local/bin/redis-cli -a "zhyl0123" --cluster create ${members} --cluster-replicas 1
   else
-    ssh ${USER[0]}@${IP[0]} -t -t "/usr/local/redis/bin/redis-cli -a 'Zhyl&redis123' --cluster create ${members} --cluster-replicas 1"
+    ssh ${USER[0]}@${IP[0]} -t -t "/usr/local/bin/redis-cli -a 'zhyl0123' --cluster create ${members} --cluster-replicas 1"
   fi
 }
 
