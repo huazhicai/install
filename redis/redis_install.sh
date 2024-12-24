@@ -36,9 +36,6 @@ config_redis() {
 
     # 拷贝并清理配置文件
     cp ${WORKDIR}/redis-6.2.6/redis.conf /etc/redis/${PORT}/redis.conf
-    sed -i '/^\s*#/d' /etc/redis/${PORT}/redis.conf  # 删除注释行
-    sed -i '/^\s*$/d' /etc/redis/${PORT}/redis.conf  # 删除空行
-
     # 修改配置文件
     sed -i 's/daemonize no/daemonize yes/g' /etc/redis/${PORT}/redis.conf
     sed -i "s/bind 127.0.0.1 .*/bind ${HOST}/g" /etc/redis/${PORT}/redis.conf
@@ -57,6 +54,8 @@ config_redis() {
     echo "requirepass zhyl0123" >> /etc/redis/${PORT}/redis.conf
     echo "masterauth zhyl0123" >> /etc/redis/${PORT}/redis.conf
 
+    sed -i '/^\s*#/d' /etc/redis/${PORT}/redis.conf  # 删除注释行
+    sed -i '/^\s*$/d' /etc/redis/${PORT}/redis.conf  # 删除空行
     echo "Redis 配置完成"
 }
 
