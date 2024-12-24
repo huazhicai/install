@@ -86,7 +86,7 @@ start_redis() {
     echo "启动 Redis 服务..."
 
     systemctl daemon-reload
-    systemctl restart redis${PORT}
+    systemctl start redis${PORT}
     systemctl enable redis${PORT}
 
     # 输出状态
