@@ -1,6 +1,4 @@
 #spark节点
-member.0=172.16.130.34:root
-member.1=172.16.130.39:root
-member.2=172.16.130.40:root
+member.0=172.16.130.42:root
 # driver单机部署, 1 表肯定
-driver=0
+driver=1

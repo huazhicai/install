@@ -35,4 +35,4 @@ install_spark
 #echo "$LOCAL_IP $HOSTNAME" >> /etc/hosts
 # 安装python依赖
 cd ${WORKDIR}
-python3 -m pip install --no-index --find-links=../pip_package -r requirements.txt
+#python3 -m pip install --no-index --find-links=../pip_package -r requirements.txt
