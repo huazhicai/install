@@ -12,7 +12,7 @@ node.name:
 
 # HTTP 服务绑定端口
 http.port: 9200  # 默认 HTTP 端口，可以更改
-transport.tcp.port: 9300
+transport.port: 9300
 
 # 是否允许跨域访问
 http.cors.enabled: true
@@ -28,3 +28,12 @@ action.auto_create_index: false
 # 集群发现配置, 由脚本自动创建
 #discovery.seed_hosts: ["192.168.0.250", "192.168.0.251", "192.168.0.252"]  # 其他节点的 IP 地址
 #cluster.initial_master_nodes: ["node-1", "node-2"]  # 初始主节点配置，确保这些节点名与实际节点匹配
+
+# 启用安全功能
+xpack.security.enabled: false
+
+# 启用 Transport SSL,当
+#xpack.security.transport.ssl.enabled: true
+#xpack.security.transport.ssl.verification_mode: certificate
+#xpack.security.transport.ssl.keystore.path: /etc/elasticsearch/certs/elastic-certificates.p12
+#xpack.security.transport.ssl.truststore.path: /etc/elasticsearch/certs/elastic-certificates.p12

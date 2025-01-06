@@ -3,8 +3,8 @@
 set -e  # Exit immediately if a command exits with a non-zero status.
 
 # 配置
-USER='elastic'
-VERSION='8.15.5'
+USER='es'
+VERSION='7.14.2'
 INSTALL_DIR="/home/${USER}/elasticsearch-${VERSION}"
 WORKDIR=$(cd "$(dirname "$0")" && pwd)
 
@@ -134,6 +134,8 @@ start_service() {
   systemctl status ${USER} --no-pager
   log 'Run the following command to check cluster health:'
   log 'curl -X GET "localhost:9200/_cluster/health?pretty"'
+  sleep 3
+  curl -X GET "localhost:9200/_cluster/health?pretty"
 }
 
 # 主函数
