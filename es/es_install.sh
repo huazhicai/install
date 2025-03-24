@@ -139,7 +139,6 @@ start_service() {
 
    # 等待 Elasticsearch 启动
   log "Waiting for Elasticsearch to start..."
-  sleep 30
 
   # 设置自定义密码
   log "Setting custom password for elastic user..."
