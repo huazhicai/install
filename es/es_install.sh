@@ -149,7 +149,8 @@ start_service() {
   # 检查服务状态
   systemctl status ${USER} --no-pager
   log 'Run the following command to check cluster health:'
-  #log 'curl -X GET "localhost:9200/_cluster/health?pretty"'
+  echo  'curl -u elastic:p2hYsv7r9hT=-SEB_-Ie -X GET "${machine_ip}:9200/_cluster/health?pretty"'
+  echo 'set password: p2hYsv7r9hT=-SEB_-Ie,  ./bin/elasticsearch-setup-passwords interactive'
 }
 
 # 主函数
@@ -170,7 +171,7 @@ main() {
   install_elasticsearch
   update_config
   set_permissions
-  #update_system_params
+  update_system_params
   install_plugins
   create_systemd_service
   start_service
