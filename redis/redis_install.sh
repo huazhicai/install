@@ -21,6 +21,7 @@ install() {
         tar -zxvf redis-6.2.6.tar.gz -C ${WORKDIR}
         cd redis-6.2.6
         make distclean
+#        make MALLOC=libc && make install
         make MALLOC=libc && make install
         echo "Redis 安装完成"
     else
