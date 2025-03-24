@@ -74,10 +74,6 @@ update_config() {
   #echo "discovery.seed_hosts: ${SEED_HOSTS}" >> "$config_file"
   #echo "cluster.initial_master_nodes: ${SEED_HOSTS}" >> "$config_file"
 
-  # 设置自定义用户名和密码
-  echo "elasticsearch.username: \"elastic\"" >> "$config_file"
-  echo "elasticsearch.password: \"p2hYsv7r9hT=-SEB_-Ie\"" >> "$config_file"
-
 }
 
 # 设置目录权限
@@ -175,7 +171,7 @@ main() {
   install_elasticsearch
   update_config
   set_permissions
-  update_system_params
+  #update_system_params
   install_plugins
   create_systemd_service
   start_service
