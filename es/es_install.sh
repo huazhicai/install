@@ -55,6 +55,10 @@ install_elasticsearch() {
   log "Starting Elasticsearch installation..."
   tar -zxvf "${WORKDIR}/elasticsearch-${VERSION}-linux-x86_64.tar.gz" -C "/home/${USER}"
   cp -f "${WORKDIR}/elasticsearch.yml" "${INSTALL_DIR}/config"
+  cp -f "${WORKDIR}/elastic-certificates.p12" "${INSTALL_DIR}/config"
+  cp -f "${WORKDIR}/elastic-stack-ca.p12" "${INSTALL_DIR}/config"
+  chmod 666 "${INSTALL_DIR}/config/elastic-certificates.p12"
+  chmod 666 "${INSTALL_DIR}/config/elastic-stack-ca.p12"
 }
 
 # 更新 Elasticsearch 配置
@@ -67,8 +71,13 @@ update_config() {
   sed -i "s|^path.logs:.*$|path.logs: /home/${USER}/logs|" "$config_file"
   sed -i "s|^network.host:.*$|network.host: ${machine_ip}|" "$config_file"
   sed -i "s|^node.name:.*$|node.name: ${HOSTNAME}|" "$config_file"
-  echo "discovery.seed_hosts: ${SEED_HOSTS}" >> "$config_file"
-  echo "cluster.initial_master_nodes: ${SEED_HOSTS}" >> "$config_file"
+  #echo "discovery.seed_hosts: ${SEED_HOSTS}" >> "$config_file"
+  #echo "cluster.initial_master_nodes: ${SEED_HOSTS}" >> "$config_file"
+
+  # 设置自定义用户名和密码
+  echo "elasticsearch.username: \"elastic\"" >> "$config_file"
+  echo "elasticsearch.password: \"p2hYsv7r9hT=-SEB_-Ie\"" >> "$config_file"
+
 }
 
 # 设置目录权限
@@ -131,11 +140,21 @@ start_service() {
   systemctl daemon-reload
   systemctl start ${USER}
   systemctl enable ${USER}
+
+   # 等待 Elasticsearch 启动
+  log "Waiting for Elasticsearch to start..."
+  sleep 30
+
+  # 设置自定义密码
+  log "Setting custom password for elastic user..."
+  curl -X POST "localhost:9200/_security/user/elastic/_password" \
+    -H "Content-Type: application/json" \
+    -d '{"password": "p2hYsv7r9hT=-SEB_-Ie"}'
+
+  # 检查服务状态
   systemctl status ${USER} --no-pager
   log 'Run the following command to check cluster health:'
   log 'curl -X GET "localhost:9200/_cluster/health?pretty"'
-#  sleep 3
-#  curl -X GET "localhost:9200/_cluster/health?pretty"
 }
 
 # 主函数
