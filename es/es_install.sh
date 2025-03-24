@@ -143,14 +143,14 @@ start_service() {
 
   # 设置自定义密码
   log "Setting custom password for elastic user..."
-  curl -X POST "localhost:9200/_security/user/elastic/_password" \
-    -H "Content-Type: application/json" \
-    -d '{"password": "p2hYsv7r9hT=-SEB_-Ie"}'
+#  curl -X POST "localhost:9200/_security/user/elastic/_password" \
+#    -H "Content-Type: application/json" \
+#    -d '{"password": "p2hYsv7r9hT=-SEB_-Ie"}'
 
   # 检查服务状态
   systemctl status ${USER} --no-pager
   log 'Run the following command to check cluster health:'
-  log 'curl -X GET "localhost:9200/_cluster/health?pretty"'
+  #log 'curl -X GET "localhost:9200/_cluster/health?pretty"'
 }
 
 # 主函数
