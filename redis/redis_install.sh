@@ -20,7 +20,7 @@ install() {
         echo "安装 Redis..."
         tar -zxvf redis-6.2.6.tar.gz -C ${WORKDIR}
         cd redis-6.2.6
-        make && make install
+        make MALLOC=libc && make install
         echo "Redis 安装完成"
     else
         echo "Redis 已经安装，跳过安装步骤"
