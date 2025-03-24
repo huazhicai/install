@@ -58,7 +58,7 @@ es_deploy(){
   do
     local_ip ${BASE_IP[i]}
     if [[ ${is_local_ip} -eq 0 ]] ;then
-      bash ${WORKDIR}/es/es_install_bak.sh
+      bash ${WORKDIR}/es/es_install.sh
       if [[ ${auth_enable} && ${auth_enable} -eq 1 ]];then
         bash ${WORKDIR}/es/searchguard_init.sh
       fi

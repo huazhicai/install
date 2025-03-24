@@ -1,8 +1,8 @@
 USERS=aiit-zhyl:Zhyl@0123,liuxiaoyuan:Zhyl@0123
-member.0=172.16.130.34:root
-member.1=172.16.130.39:root
-member.2=172.16.130.40:root
-member.3=172.16.130.42:root
+member.0=172.16.130.167:root
+member.1=172.16.130.168:root
+member.2=172.16.130.169:root
+member.3=172.16.130.170:root
 # 是否关闭防火墙, 0关闭
 firewall=1
 

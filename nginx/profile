@@ -1,3 +1,3 @@
 #服务器初始化用户，用户名和密码将一致
 USERS=aiit-zhyl:Zhyl@0123,liuxiaoyuan:liuxiaoyuan
-member.0=172.16.130.42:root
+member.0=172.16.130.170:root

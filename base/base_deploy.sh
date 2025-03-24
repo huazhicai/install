@@ -34,7 +34,6 @@ base_file_sync(){
       else
         sh ${WORKDIR}/sync.sh ${BASE_USERNAME[i]}  ${BASE_IP[i]}
         rsync -avzP ${WORKDIR}/base ${BASE_USERNAME[i]}@${BASE_IP[i]}:${WORKDIR}/
-        rsync -avzP ${WORKDIR}/package/base ${BASE_USERNAME[i]}@${BASE_IP[i]}:${WORKDIR}/package
       fi
   done
 }

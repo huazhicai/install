@@ -18,7 +18,7 @@ transport.port: 9300
 http.cors.enabled: true
 http.cors.allow-origin: "*"  # 允许所有域名访问，可以根据需求设置为特定的域名，例如 "http://localhost"
 
-# 节点配置
+# 节点配置, 8版本后用， node.roles: [data, master]
 node.master: true   # 是否为主节点
 node.data: true     # 是否存储数据
 
@@ -26,14 +26,13 @@ node.data: true     # 是否存储数据
 action.auto_create_index: false
 
 # 集群发现配置, 由脚本自动创建
-#discovery.seed_hosts: ["192.168.0.250", "192.168.0.251", "192.168.0.252"]  # 其他节点的 IP 地址
-#cluster.initial_master_nodes: ["node-1", "node-2"]  # 初始主节点配置，确保这些节点名与实际节点匹配
+discovery.seed_hosts: ["172.16.130.167", "172.16.130.168", "172.16.130.169"]  # 其他节点的 IP 地址
+cluster.initial_master_nodes: ["172.16.130.167", "172.16.130.168", "172.16.130.169"]  # 初始主节点配置，确保这些节点名与实际节点匹配
 
 # 启用安全功能
-xpack.security.enabled: false
-
-# 启用 Transport SSL,当
-#xpack.security.transport.ssl.enabled: true
-#xpack.security.transport.ssl.verification_mode: certificate
-#xpack.security.transport.ssl.keystore.path: /etc/elasticsearch/certs/elastic-certificates.p12
-#xpack.security.transport.ssl.truststore.path: /etc/elasticsearch/certs/elastic-certificates.p12
+xpack.security.enabled: true
+xpack.security.enabled: true
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.verification_mode: certificate
+xpack.security.transport.ssl.keystore.path: /home/es/elasticsearch-8.15.5/config/elastic-certificates.p12
+xpack.security.transport.ssl.truststore.path: /home/es/elasticsearch-8.15.5/config/elastic-certificates.p12
