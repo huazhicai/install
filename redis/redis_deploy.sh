@@ -73,7 +73,7 @@ redis_deploy(){
     /usr/local/bin/redis-cli -a "zhyl0123" --cluster create ${members} --cluster-replicas 1
   else
     echo "因为要交互建议手动初始化：/usr/local/bin/redis-cli -a 'zhyl0123' --cluster create ${members} --cluster-replicas 1"
-    ssh ${USER[0]}@${IP[0]} -t -t "/usr/local/bin/redis-cli -a 'zhyl0123' --cluster create ${members} --cluster-replicas 1"
+    #ssh ${USER[0]}@${IP[0]} -t -t "/usr/local/bin/redis-cli -a 'zhyl0123' --cluster create ${members} --cluster-replicas 1"
   fi
 }
 
