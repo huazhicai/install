@@ -22,7 +22,7 @@ install() {
         cd redis-6.2.6
         make distclean
 #        make MALLOC=libc && make install
-        make MALLOC=libc && make install
+        make && make install
         echo "Redis 安装完成"
     else
         echo "Redis 已经安装，跳过安装步骤"
