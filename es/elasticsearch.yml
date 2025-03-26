@@ -19,9 +19,9 @@ http.cors.enabled: true
 http.cors.allow-origin: "*"  # 允许所有域名访问，可以根据需求设置为特定的域名，例如 "http://localhost"
 
 # 节点配置, 8版本后用， node.roles: [data, master]
-#node.master: true   # 是否为主节点
-#node.data: true     # 是否存储数据
-node.roles: [data, master]
+node.master: true   # 是否为主节点
+node.data: true     # 是否存储数据
+#node.roles: [data, master]
 
 
 # 禁止自动创建索引
@@ -35,5 +35,5 @@ cluster.initial_master_nodes: ["172.16.130.167", "172.16.130.168", "172.16.130.1
 xpack.security.enabled: true
 xpack.security.transport.ssl.enabled: true
 xpack.security.transport.ssl.verification_mode: certificate
-xpack.security.transport.ssl.keystore.path: /home/es/elasticsearch-8.15.5/config/elastic-certificates.p12
-xpack.security.transport.ssl.truststore.path: /home/es/elasticsearch-8.15.5/config/elastic-certificates.p12
+xpack.security.transport.ssl.keystore.path: /home/es/elasticsearch-7.14.2/config/elastic-certificates.p12
+xpack.security.transport.ssl.truststore.path: /home/es/elasticsearch-7.14.2/config/elastic-certificates.p12

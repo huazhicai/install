@@ -2,9 +2,9 @@
 
 set -e  # Exit immediately if a command exits with a non-zero status.
 
-# 配置
-USER='es'
-VERSION='8.15.5'
+# 配置，1，es, 2,elastic,3,elasticsearch; 先后对应不同版本
+USER='elastic'
+VERSION='7.14.2'
 INSTALL_DIR="/home/${USER}/elasticsearch-${VERSION}"
 WORKDIR=$(cd "$(dirname "$0")" && pwd)
 
@@ -171,7 +171,7 @@ main() {
   install_elasticsearch
   update_config
   set_permissions
-  update_system_params
+  #update_system_params
   install_plugins
   create_systemd_service
   start_service
