@@ -35,5 +35,5 @@ cluster.initial_master_nodes: ["172.16.130.167", "172.16.130.168", "172.16.130.1
 xpack.security.enabled: true
 xpack.security.transport.ssl.enabled: true
 xpack.security.transport.ssl.verification_mode: certificate
-xpack.security.transport.ssl.keystore.path: /home/es/elasticsearch-7.14.2/config/elastic-certificates.p12
-xpack.security.transport.ssl.truststore.path: /home/es/elasticsearch-7.14.2/config/elastic-certificates.p12
+xpack.security.transport.ssl.keystore.path: /home/elastic/elasticsearch-7.14.2/config/elastic-certificates.p12
+xpack.security.transport.ssl.truststore.path: /home/elastic/elasticsearch-7.14.2/config/elastic-certificates.p12
